@@ -4,22 +4,23 @@
 #include <QFileDialog>
 #include <QApplication>
 #include <QMessageBox>
+#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     // 窗口基本设置
     setFixedSize(800, 600);
-    setStyleSheet("background-color:" "#1a2228;");
+    setStyleSheet("background-color: #f0f0f0;"); // 调整为浅灰色背景
     setWindowTitle("Qt 信息管理系统");
 
     // 数据持久化设置
-    QString appPath = QApplication::applicationDirPath(); // 获取程序运行目录
-    QDir photoDir(appPath + "/../photos"); // 定义照片文件夹路径
-    if (!photoDir.exists()) { // 如果文件夹不存在
-        photoDir.mkpath("."); // 则创建它
+    QString appPath = QApplication::applicationDirPath();
+    QDir photoDir(appPath + "/../photos");
+    if (!photoDir.exists()) {
+        photoDir.mkpath(".");
     }
-    dataFilePath = appPath + "/student_data.csv"; // 定义数据文件路径
+    dataFilePath = appPath + "/student_data.csv";
 
     studentList = new StuList();
 
@@ -33,28 +34,28 @@ MainWindow::MainWindow(QWidget *parent)
     // 左侧布局
     dataListWidget = new QListWidget(this);
     dataListWidget->setStyleSheet(
-        "QListWidget { background-color: #273038; border: 1px solid #3d4a57; color: #b0c4de; font-family: Arial; font-size: 14px; }"
+        "QListWidget { background-color: #ffffff; border: 1px solid #cccccc; color: #333333; font-family: Arial; font-size: 14px; }"
         "QListWidget::item { padding: 4px; }"
-        "QListWidget::item:selected { background-color: #3d4a57; color: #5bc0de; }"
-        "QScrollBar:vertical { background: #1a2228; width: 10px; border: none; }"
-        "QScrollBar::handle:vertical { background: #3d4a57; border-radius: 5px; min-height: 20px; }"
+        "QListWidget::item:selected { background-color: #cccccc; color: #000000; }"
+        "QScrollBar:vertical { background: #f0f0f0; width: 10px; border: none; }"
+        "QScrollBar::handle:vertical { background: #999999; border-radius: 5px; min-height: 20px; }"
         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { border: none; background: none; }"
         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }");
 
     // 搜索栏框架和内容 (使用布局管理器)
     searchFrame = new QFrame(this);
     searchFrame->setFrameStyle(QFrame::Box | QFrame::Raised);
-    searchFrame->setStyleSheet("background-color: #273038; border: 1px solid #3d4a57;");
+    searchFrame->setStyleSheet("background-color: #ffffff; border: 1px solid #cccccc;");
     QHBoxLayout *searchLayout = new QHBoxLayout(searchFrame);
     searchLayout->setContentsMargins(10, 2, 10, 2);
     searchLabel = new QLabel("搜索栏");
-    searchLabel->setStyleSheet("color: #b0c4de;");
+    searchLabel->setStyleSheet("color: #333333;");
     searchLineEdit = new QLineEdit();
     searchButton = new QPushButton("搜索");
     QString searchButtonStyle =
-        "QPushButton { background-color: #31b0d5; border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 14px; padding: 6px 12px; }"
-        "QPushButton:hover { background-color: #5bc0de; }"
-        "QPushButton:pressed { background-color: #286090; border-style: inset; border-width: 2px; border-color: #1e4566; }";
+        "QPushButton { background-color: #333333; border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 14px; padding: 6px 12px; }"
+        "QPushButton:hover { background-color: #666666; }"
+        "QPushButton:pressed { background-color: #000000; border-style: inset; border-width: 2px; border-color: #000000; }";
     searchButton->setStyleSheet(searchButtonStyle);
     searchLayout->addWidget(searchLabel);
     searchLayout->addWidget(searchLineEdit);
@@ -63,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     photoDisplayLabel = new QLabel(this);
     photoDisplayLabel->setFrameStyle(QFrame::Box | QFrame::Raised);
-    photoDisplayLabel->setStyleSheet("background-color: #273038; border: 1px solid #3d4a57; color: #b0c4de;");
+    photoDisplayLabel->setStyleSheet("background-color: #ffffff; border: 1px solid #cccccc; color: #333333;");
     photoDisplayLabel->setAlignment(Qt::AlignCenter);
     photoDisplayLabel->setText("请选择信息查看");
     photoDisplayLabel->setMinimumSize(200, 200);
@@ -75,13 +76,13 @@ MainWindow::MainWindow(QWidget *parent)
     // 右侧布局
     titleLabel = new QLabel("Qt 信息管理系统", this);
     titleLabel->setAlignment(Qt::AlignCenter);
-    titleLabel->setStyleSheet("color: #5bc0de; font-size: 18px; font-weight: bold;");
+    titleLabel->setStyleSheet("color: #000000; font-size: 18px; font-weight: bold;");
 
-    QString lightLabelStyle = "color: #b0c4de;";
-    QString lineEditStyle = "background-color: #273038; border: 1px solid #3d4a57; color: #b0c4de;";
-    QString clearButtonStyle = "QPushButton { background-color: transparent; border: none; color: #6a737d; font-weight: bold; font-size: 16px; border-radius: 12px; } QPushButton:hover { color: #b0c4de; background-color: #3d4a57; }";
-    QString checkBoxStyle = "QCheckBox { color: #b0c4de; } QCheckBox::indicator { background-color: #273038; border: 1px solid #3d4a57; border-radius: 4px; width: 14px; height: 14px; } QCheckBox::indicator:hover { background-color: #3d4a57; } QCheckBox::indicator:checked { background-color: #5bc0de; border: 1px solid #5bc0de; } QCheckBox::indicator:checked:hover { background-color: #31b0d5; border: 1px solid #31b0d5; }";
-    QString buttonStyle = "QPushButton { background-color: #5bc0de; border: none; border-radius: 14px; color: white; font-weight: bold; font-size: 12px; padding: 8px 16px; } QPushButton:hover { background-color: #31b0d5; } QPushButton:pressed { background-color: #286090; border-style: inset; border-width: 2px; border-color: #1e4566; }";
+    QString lightLabelStyle = "color: #333333;";
+    QString lineEditStyle = "background-color: #ffffff; border: 1px solid #cccccc; color: #333333;";
+    QString clearButtonStyle = "QPushButton { background-color: transparent; border: none; color: #888888; font-weight: bold; font-size: 16px; border-radius: 12px; } QPushButton:hover { color: #000000; background-color: #cccccc; }";
+    QString checkBoxStyle = "QCheckBox { color: #333333; } QCheckBox::indicator { background-color: #e0e0e0; border: 1px solid #888888; border-radius: 4px; width: 14px; height: 14px; } QCheckBox::indicator:hover { background-color: #cccccc; } QCheckBox::indicator:checked { background-color: #000000; border: 1px solid #000000; } QCheckBox::indicator:checked:hover { background-color: #333333; border: 1px solid #333333; }";
+    QString buttonStyle = "QPushButton { background-color: #333333; border: none; border-radius: 14px; color: white; font-weight: bold; font-size: 12px; padding: 8px 16px; } QPushButton:hover { background-color: #666666; } QPushButton:pressed { background-color: #000000; border-style: inset; border-width: 2px; border-color: #000000; }";
 
     // 使用 QFormLayout 来组织标签和输入框，更整洁
     QFormLayout *formLayout = new QFormLayout();
@@ -190,11 +191,11 @@ MainWindow::MainWindow(QWidget *parent)
     returnButton = new QPushButton("返回");
     deleteButton = new QPushButton("删除");
     viewButton = new QPushButton("查看");
-    exportButton = new QPushButton("导出"); // 创建导出按钮
+    exportButton = new QPushButton("导出");
     buttonLayout2->addWidget(returnButton);
     buttonLayout2->addWidget(deleteButton);
     buttonLayout2->addWidget(viewButton);
-    buttonLayout2->addWidget(exportButton); // 将按钮添加到布局
+    buttonLayout2->addWidget(exportButton);
 
     modifyButton->setStyleSheet(buttonStyle);
     saveModifiedButton->setStyleSheet(buttonStyle);
@@ -203,12 +204,12 @@ MainWindow::MainWindow(QWidget *parent)
     returnButton->setStyleSheet(buttonStyle);
     deleteButton->setStyleSheet(buttonStyle);
     viewButton->setStyleSheet(buttonStyle);
-    exportButton->setStyleSheet(buttonStyle); // 为按钮设置样式
+    exportButton->setStyleSheet(buttonStyle);
 
     // 查看信息框架 (使用布局管理器)
     viewFrame = new QFrame(this);
     viewFrame->setFrameStyle(QFrame::Box | QFrame::Raised);
-    viewFrame->setStyleSheet("background-color: #273038; border: 1px solid #3d4a57;");
+    viewFrame->setStyleSheet("background-color: #ffffff; border: 1px solid #cccccc;");
     QVBoxLayout *viewLayout = new QVBoxLayout(viewFrame);
     viewIdLabel = new QLabel("ID:");
     viewNameLabel = new QLabel("姓名:");
@@ -229,20 +230,20 @@ MainWindow::MainWindow(QWidget *parent)
     QLabel *photoNoteLabel = new QLabel(this);
     photoNoteLabel->setText(QString("照片文件夹的相对路径: \n ./build/Desktop_Qt_6_5_3_MinGW_64_bit-Debug/photos \n 添加信息前需要先把照片文件存放至照片文件夹里"));
     photoNoteLabel->setFrameStyle(QFrame::Box | QFrame::Raised);
-    photoNoteLabel->setStyleSheet("background-color: #273038; border: 1px solid #3d4a57; color: #b0c4de; padding: 5px;");
+    photoNoteLabel->setStyleSheet("background-color: #ffffff; border: 1px solid #cccccc; color: #333333; padding: 5px;");
     rightLayout->addWidget(photoNoteLabel);
 
     // **提示标签**
     viewNoteLabel = new QLabel(this);
     viewNoteLabel->setText("点击查看后即可查看照片与其他信息");
     viewNoteLabel->setWordWrap(true);
-    viewNoteLabel->setStyleSheet("background-color: #273038; border: 1px solid #3d4a57; color: #b0c4de; padding: 5px;");
+    viewNoteLabel->setStyleSheet("background-color: #ffffff; border: 1px solid #cccccc; color: #333333; padding: 5px;");
     rightLayout->addWidget(viewNoteLabel);
 
     modifyNoteLabel = new QLabel(this);
     modifyNoteLabel->setText("点击修改后，需要点击保存按钮，才能成功保存修改后的信息");
     modifyNoteLabel->setWordWrap(true);
-    modifyNoteLabel->setStyleSheet("background-color: #273038; border: 1px solid #3d4a57; color: #b0c4de; padding: 5px;");
+    modifyNoteLabel->setStyleSheet("background-color: #ffffff; border: 1px solid #cccccc; color: #333333; padding: 5px;");
     rightLayout->addWidget(modifyNoteLabel);
 
 
@@ -273,7 +274,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(saveModifiedButton, &QPushButton::clicked, this, &MainWindow::handleSaveModifiedButtonClicked);
     connect(searchButton, &QPushButton::clicked, this, &MainWindow::handleSearchButtonClicked);
     connect(returnButton, &QPushButton::clicked, this, &MainWindow::handleReturnButtonClicked);
-    connect(exportButton, &QPushButton::clicked, this, &MainWindow::handleExportButtonClicked); // 连接信号与槽
+    connect(exportButton, &QPushButton::clicked, this, &MainWindow::handleExportButtonClicked);
 
     // 程序启动时加载初始数据
     loadData();
@@ -610,14 +611,14 @@ QString MainWindow::formatData(const Student &student)
 void MainWindow::applyMessageBoxStyles(QMessageBox &msgBox)
 {
     msgBox.setStyleSheet(
-        "QMessageBox { background-color: #273038; font-family: Arial; font-size: 14px; }"
-        "QMessageBox QLabel { color: #b0c4de; }"
+        "QMessageBox { background-color: #ffffff; font-family: Arial; font-size: 14px; }"
+        "QMessageBox QLabel { color: #333333; }"
         "QMessageBox QPushButton {"
-        "   background-color: #5bc0de;"
+        "   background-color: #333333;"
         "   border: none; border-radius: 12px; color: white;"
         "   font-weight: bold; padding: 8px 24px; min-width: 80px;"
         "}"
-        "QMessageBox QPushButton:hover { background-color: #31b0d5; }"
-        "QMessageBox QPushButton:pressed { background-color: #286090; }"
+        "QMessageBox QPushButton:hover { background-color: #666666; }"
+        "QMessageBox QPushButton:pressed { background-color: #000000; }"
         );
 }
